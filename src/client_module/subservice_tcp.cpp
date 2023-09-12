@@ -60,8 +60,8 @@ SubServiceTcp::SubServiceTcp(std::string url, int port, uint32_t client_id, uint
 }
 
 SubServiceTcp::~SubServiceTcp(){
-    hevent_set_userdata(self_io, NULL);
     if( self_io != NULL ){
+        hevent_set_userdata(self_io, NULL);
         hio_close(self_io);
     }
     printf("subservice tcp delete, client id : %d, service id: %d\n", self_client_id, self_service_id);
