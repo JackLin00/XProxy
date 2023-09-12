@@ -1,4 +1,5 @@
 add_rules("mode.debug", "mode.release")
+set_warnings("all", "error")
 
 add_requires("libhv")
 set_languages("cxx11", "c99")
@@ -9,11 +10,6 @@ rule("MoveConfFile")
         -- os.cp(os.projectdir() .. "/config/*", target:targetdir())
     end)
 
-
-if is_mode("debug") then
-    add_defines("DEBUG_FLAG")
-end
-
 target("XProxys")
     set_kind("binary")
     add_files("src/server.cpp", "src/server_module/*.cpp", "src/protocol.cpp")
@@ -22,6 +18,9 @@ target("XProxys")
     add_includedirs("src/server_module", "src")
     add_defines("_GLIBCXX_USE_SCHED_YIELD", "_GLIBCXX_USE_NANOSLEEP")
     add_rules("MoveConfFile")
+    if is_mode("debug") then
+        add_defines("DEBUG_FLAG")
+    end
 
 
 target("XProxyc")
@@ -31,3 +30,6 @@ target("XProxyc")
     add_includedirs("src/client_module", "src")
     add_packages("libhv")
     add_rules("MoveConfFile")
+    if is_mode("debug") then
+        add_defines("DEBUG_FLAG")
+    end

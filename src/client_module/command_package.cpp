@@ -6,7 +6,7 @@
 CodecBuf_t PackageLoginReqCommand(std::string& login_string){
     PACKAGE_DATA_START(LOGIN_CMD_REQ, login_string.length() + 1);
 
-    for( int i = 0; i < login_string.length(); i++ ){
+    for( long unsigned int i = 0; i < login_string.length(); i++ ){
         *p_buffer++ = login_string.c_str()[i];
     }
     *p_buffer = 0x00;

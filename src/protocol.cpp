@@ -21,13 +21,13 @@ static void BitsSetU32LeInline(unsigned char* p, uint32_t x)
     p[3] = (uint32_t)(x >> 24);
 }
 
-static void BitsSetU32BeInline(unsigned char* p, uint32_t x)
-{
-    p[0] = (uint32_t)(x >> 24);
-    p[1] = (uint32_t)(x >> 16);
-    p[2] = (uint32_t)(x >> 8);
-    p[3] = (uint32_t)x;
-}
+// static void BitsSetU32BeInline(unsigned char* p, uint32_t x)
+// {
+//     p[0] = (uint32_t)(x >> 24);
+//     p[1] = (uint32_t)(x >> 16);
+//     p[2] = (uint32_t)(x >> 8);
+//     p[3] = (uint32_t)x;
+// }
 
 static void BitsSetU16LeInline(unsigned char* p, uint16_t x)
 {
@@ -35,11 +35,11 @@ static void BitsSetU16LeInline(unsigned char* p, uint16_t x)
     p[1] = (uint16_t)(x >> 8);
 }
 
-static void BitsSetU16BeInline(unsigned char* p, uint16_t x)
-{
-    p[0] = (uint16_t)(x >> 8);
-    p[1] = (uint16_t)x;
-}
+// static void BitsSetU16BeInline(unsigned char* p, uint16_t x)
+// {
+//     p[0] = (uint16_t)(x >> 8);
+//     p[1] = (uint16_t)x;
+// }
 
 int PaddingU32ToBuffer(unsigned char *p, uint32_t data){
     // 拷贝到 Buffer 统一转为 小端

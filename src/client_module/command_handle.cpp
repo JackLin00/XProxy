@@ -5,6 +5,7 @@
 #include "project_conf.h"
 #include "command_package.h"
 #include "subservice_tcp.h"
+#include "hv/hdef.h"
 #include <vector>
 #include <stdlib.h>
 #include <string>
@@ -39,7 +40,6 @@ void SendLoginCommand(IniParser *parser, hio_t *io){
     json_obj["info"] = {};
 
     for( auto item : service_list ){
-        hio_t *tmp_io;
         nlohmann::json tmp_obj;
         auto type = parser->GetValue("type", item);
         auto url = parser->GetValue("local_ip", item);
@@ -47,7 +47,7 @@ void SendLoginCommand(IniParser *parser, hio_t *io){
 
         ServiceItem service_item;
 
-        printf("index : %d, service name : %s, local_ip : %s, local_port : %d, Type : %s\n", ServiceTable.size(), 
+        printf("index : %lu, service name : %s, local_ip : %s, local_port : %d, Type : %s\n", ServiceTable.size(), 
             item.c_str(), url.c_str(), port, type.c_str());
 
         tmp_obj["index"] = ServiceTable.size();
@@ -112,7 +112,7 @@ void CommandHandle(char *buf, int len, hio_t *io){
     printf("get cmd : %x -- (%d:%d)\n", recv_payload->cmd, recv_payload->len, len);
 #endif
 
-    for(int i = 0; i < (sizeof(CommandTable) / sizeof(CommandTable[0])); i++ ){
+    for(int i = 0; i < (int)ARRAY_SIZE(CommandTable); i++ ){
         if( recv_payload->cmd == CommandTable[i].cmd ){
             CommandTable[i].func_handle(recv_payload, io);
         }

@@ -89,7 +89,7 @@ void CommandHandle(char *buf, int len, hio_t *io){
 #endif
 
 
-    for(int i = 0; i < (sizeof(CommandTable) / sizeof(CommandTable[0])); i++ ){
+    for(int i = 0; i < (int)ARRAY_SIZE(CommandTable); i++ ){
         if( recv_payload->cmd == CommandTable[i].cmd ){
             CommandTable[i].func_handle(recv_payload, io);
         }
@@ -168,7 +168,6 @@ static void HandleSubServiceDisConnect(const ProjectProtocol_t* payload, hio_t *
     uint32_t client_id = GetU32FromBuffer((unsigned char*)payload->param);
     uint32_t service_id = GetU32FromBuffer((unsigned char*)&payload->param[4]);
     printf("passivity disconnect client id : %d, service id : %d\n", client_id, service_id);
-    auto &client_service =  clients_table[hio_id(io)];
     hio_close(subservice_clients[client_id]);
 }
 

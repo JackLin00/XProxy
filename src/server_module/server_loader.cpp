@@ -54,7 +54,7 @@ void ServerLoader(IniParser *parser) {
         exit(-1);
     }
 
-    memset(&unpack_setting, 0, sizeof(unpack_setting_t));
+    memset((void*)&unpack_setting, 0, sizeof(unpack_setting_t));
     unpack_setting.package_max_length = DEFAULT_PACKAGE_MAX_LENGTH;
     unpack_setting.mode = UNPACK_BY_DELIMITER;
     unpack_setting.delimiter[0] = TAIL_CHAR;
