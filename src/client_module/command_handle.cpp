@@ -3,6 +3,7 @@
 #include "hv/json.hpp"
 #include "hv/hbase.h"
 #include "project_conf.h"
+#include "user_log.h"
 #include "command_package.h"
 #include "subservice_tcp.h"
 #include "hv/hdef.h"
@@ -33,7 +34,7 @@ void SendLoginCommand(IniParser *parser, hio_t *io){
     nlohmann::json json_obj;
     auto service_list = parser->GetSections();
     if( service_list.empty() ){
-        printf("error, Can't get any service,exiting....\n");
+        INFO("error, Can't get any service,exiting....\n");
         exit(-1);
     }
 
@@ -47,8 +48,7 @@ void SendLoginCommand(IniParser *parser, hio_t *io){
 
         ServiceItem service_item;
 
-        printf("index : %lu, service name : %s, local_ip : %s, local_port : %d, Type : %s\n", ServiceTable.size(), 
-            item.c_str(), url.c_str(), port, type.c_str());
+        INFO("index : {}, service name : {}, local_ip : {}, local_port {}, type : {}\n", ServiceTable.size(), item.c_str(), url.c_str(), port, type.c_str());
 
         tmp_obj["index"] = ServiceTable.size();
         tmp_obj["name"] = item;
@@ -104,7 +104,7 @@ void CommandHandle(char *buf, int len, hio_t *io){
     const ProjectProtocol_t *recv_payload = PreProcessCommand(recv_data.buf, recv_data.len);
 
     if( calc_sum != recv_payload->checksum ){
-        printf("check sum error. calc : [%x], real : [%x]\n", calc_sum, recv_payload->checksum);
+        INFO("check sum error. calc : {:x}, real : {:x}\n", calc_sum, recv_payload->checksum);
         return;
     }
 
@@ -121,16 +121,16 @@ void CommandHandle(char *buf, int len, hio_t *io){
 
 static void HandleLoginRsp(const ProjectProtocol_t* payload, hio_t *io){
     if( payload->param[0] == 0x00 ){
-        printf("login success\n");
+        INFO("login success\n");
     } else {
-        printf("login faild, code : %d\n", payload->param[0]);
+        INFO("login faild, code : {}\n", payload->param[0]);
     }
 }
 
 static void HandleClientConnect(const ProjectProtocol_t* payload, hio_t *io){
     uint32_t client_id = GetU32FromBuffer((unsigned char*)payload->param);
     uint32_t service_id = GetU32FromBuffer((unsigned char*)&payload->param[4]);
-    printf("connect client id : %d, service id : %d\n", client_id, service_id);
+    INFO("connect client id : {}, service id : {}\n", client_id, service_id);
 
     // 当服务的类型为 TCP 就需要创建 TCP client 去连接本地的服务器
     auto &service_handle = ServiceTable[service_id];
@@ -141,7 +141,7 @@ static void HandleClientConnect(const ProjectProtocol_t* payload, hio_t *io){
             // 当断开时，需要进行清理
             delete ServiceTable[service_id].client_table[client_id].sub_service_handle;
             ServiceTable[service_id].client_table.erase(client_id);
-            printf("subservice onclose : client id : %d, service id :%d\n", client_id, service_id);
+            INFO("subservice onclose : client id : {}, service id :{}\n", client_id, service_id);
         });
         service_handle.client_table[client_id] = client_item;
     }
@@ -152,7 +152,7 @@ static void HandleClientConnect(const ProjectProtocol_t* payload, hio_t *io){
 static void HandleClientDisconnect(const ProjectProtocol_t* payload, hio_t *io){
     uint32_t client_id = GetU32FromBuffer((unsigned char*)payload->param);
     uint32_t service_id = GetU32FromBuffer((unsigned char*)&payload->param[4]);
-    printf("disconnect client id : %d, service id : %d\n", client_id, service_id);
+    INFO("disconnect client id : {}, service id : {}\n", client_id, service_id);
 
     delete ServiceTable[service_id].client_table[client_id].sub_service_handle;
     ServiceTable[service_id].client_table.erase(client_id);
@@ -161,7 +161,7 @@ static void HandleClientDisconnect(const ProjectProtocol_t* payload, hio_t *io){
 static void HandleClientData(const ProjectProtocol_t* payload, hio_t *io){
     uint32_t client_id = GetU32FromBuffer((unsigned char*)payload->param);
     uint32_t service_id = GetU32FromBuffer((unsigned char*)&payload->param[4]);
-    printf("on data client id : %d, service id : %d\n", client_id, service_id);
+    INFO("on data client id : {}, service id : {}\n", client_id, service_id);
 
     if( ServiceTable[service_id].type == 0 ){
         // TCP 

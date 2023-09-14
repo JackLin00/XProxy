@@ -1,5 +1,6 @@
 #include "subservice_tcp.h"
 #include "command_package.h"
+#include "user_log.h"
 
 extern hio_t *connect_xproxys_io;
 
@@ -7,7 +8,7 @@ extern hio_t *connect_xproxys_io;
 
 static void on_message(hio_t* io, void* buf, int len) {
     SubServiceTcp *handle = (SubServiceTcp*)hevent_userdata(io);
-    printf("subservice tcp get data, client id : %d, service id: %d, len : %d\n", handle->self_client_id, handle->self_service_id, len);
+    INFO("subservice tcp get data, client id : {}, service id: {}, len : {}\n", handle->self_client_id, handle->self_service_id, len);
 #ifdef DEBUG_FLAG
     uint8_t *p = (uint8_t *)buf;
     for( int i = 0; i < len; i++){
@@ -64,7 +65,7 @@ SubServiceTcp::~SubServiceTcp(){
         hevent_set_userdata(self_io, NULL);
         hio_close(self_io);
     }
-    printf("subservice tcp delete, client id : %d, service id: %d\n", self_client_id, self_service_id);
+    INFO("subservice tcp delete, client id : {}, service id: {}\n", self_client_id, self_service_id);
 }
 
 
