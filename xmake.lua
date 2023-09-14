@@ -5,34 +5,34 @@ add_requires("libhv")
 set_languages("cxx11", "c99")
 
 
-rule("MoveConfFile")
-    after_build(function (target)
-        -- os.cp(os.projectdir() .. "/config/*", target:targetdir())
-    end)
+-- common area   begin
+
+-- disable some warn
+add_cxflags("-Wno-sign-compare")
+add_defines("_GLIBCXX_USE_SCHED_YIELD", "_GLIBCXX_USE_NANOSLEEP")
+
+if is_mode("debug") then
+    add_defines("DEBUG_FLAG")
+end
+
+-- add file 
+add_files("src/cmd_codec.cpp", "src/protocol.cpp", "src/user_log.cpp")
+
+-- add include 
+add_includedirs("src/spdlog-1.0.0/include", "src")
+-- add package
+add_packages("libhv")
+
+-- common area   end
+
 
 target("XProxys")
     set_kind("binary")
-    add_files("src/server.cpp", "src/server_module/*.cpp", "src/protocol.cpp")
-    add_files("src/cmd_codec.cpp")
-    add_packages("libhv")
-    add_includedirs("src/server_module", "src", "src/spdlog-1.0.0/include")
-    add_defines("_GLIBCXX_USE_SCHED_YIELD", "_GLIBCXX_USE_NANOSLEEP")
-    add_rules("MoveConfFile")
-    add_cxflags("-Wno-sign-compare")
-    if is_mode("debug") then
-        add_defines("DEBUG_FLAG")
-    end
+    add_files("src/server.cpp", "src/server_module/*.cpp")
+    add_includedirs("src/server_module")
 
 
 target("XProxyc")
     set_kind("binary")
-    add_files("src/client.cpp", "src/client_module/*.cpp", "src/protocol.cpp")
-    add_files("src/cmd_codec.cpp")
-    add_includedirs("src/client_module", "src", "src/spdlog-1.0.0/include")
-    add_defines("_GLIBCXX_USE_SCHED_YIELD", "_GLIBCXX_USE_NANOSLEEP")
-    add_cxflags("-Wno-sign-compare")
-    add_packages("libhv")
-    add_rules("MoveConfFile")
-    if is_mode("debug") then
-        add_defines("DEBUG_FLAG")
-    end
+    add_files("src/client.cpp", "src/client_module/*.cpp")
+    add_includedirs("src/client_module")

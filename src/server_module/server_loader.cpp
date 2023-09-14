@@ -3,6 +3,7 @@
 #include "hv/hsocket.h"
 #include "hv/hv.h"
 #include "server_loader.h"
+#include "user_log.h"
 #include "cmd_codec.h"
 #include "command_handle.h"
 #include <stdio.h>
@@ -12,15 +13,15 @@ unpack_setting_t unpack_setting;
 
 
 static void on_close(hio_t* io) {
-    printf("on_close fd=%d error=%d\n", hio_fd(io), hio_error(io));
+    DEBUG("on_close fd={} error={}\n", hio_fd(io), hio_error(io));
     XproxyOnClose(io);
 }
 
 static void on_recv(hio_t* io, void* buf, int readbytes) {
-    printf("on_recv fd=%d readbytes=%d\n", hio_fd(io), readbytes);
+    DEBUG("on_recv fd={} readbytes={}\n", hio_fd(io), readbytes);
     char localaddrstr[SOCKADDR_STRLEN] = {0};
     char peeraddrstr[SOCKADDR_STRLEN] = {0};
-    printf("[%s] <=> [%s]\n",
+    DEBUG("[%s] <=> [%s]\n",
             SOCKADDR_STR(hio_localaddr(io), localaddrstr),
             SOCKADDR_STR(hio_peeraddr(io), peeraddrstr));
     CommandHandle((char*)buf, readbytes, io);
@@ -28,10 +29,10 @@ static void on_recv(hio_t* io, void* buf, int readbytes) {
 
 
 static void on_accept(hio_t* io) {
-    printf("on_accept connfd=%d\n", hio_fd(io));
+    DEBUG("on_accept connfd={}\n", hio_fd(io));
     char localaddrstr[SOCKADDR_STRLEN] = {0};
     char peeraddrstr[SOCKADDR_STRLEN] = {0};
-    printf("accept connfd=%d [%s] <= [%s]\n", hio_fd(io),
+    DEBUG("accept connfd={} [{}] <= [{}]\n", hio_fd(io),
             SOCKADDR_STR(hio_localaddr(io), localaddrstr),
             SOCKADDR_STR(hio_peeraddr(io), peeraddrstr));
 
@@ -45,7 +46,8 @@ static void on_accept(hio_t* io) {
 void ServerLoader(IniParser *parser) {
     std::string host = parser->GetValue("host", "common");
     int port = parser->Get<int>("port", "common");
-    printf("host : %s:%d\n", host.c_str(), port);
+    SET_LOG_LEVEL(spdlog::level::debug);
+    DEBUG("host : {}:{}\n", host.c_str(), port);
 
     hloop_t* loop = hloop_new(0);
     hio_t* listenio = hloop_create_tcp_server(loop, "0.0.0.0", port, on_accept);
