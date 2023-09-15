@@ -49,6 +49,12 @@ int main(int argc, char** argv) {
         exit(0);
     }
 
+    if( get_arg("c") == NULL ){
+        printf("please input config file path\n");
+        PrintHelp();
+        exit(0);
+    }
+
     if (conf_file_handle.LoadFromFile(get_arg("c")) != 0) {
         printf("Parse config file error,please check it.\n");
         exit(0);
