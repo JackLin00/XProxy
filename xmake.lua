@@ -5,6 +5,20 @@ add_requires("libhv")
 set_languages("cxx11", "c99")
 
 
+option("XProxysOpenLua")
+    set_default(false)
+    set_showmenu(true)
+    set_category("option")
+    set_description("Enable or disable Lua In XProxys.")
+option_end()
+
+option("XProxycOpenLua")
+    set_default(false)
+    set_showmenu(true)
+    set_category("option")
+    set_description("Enable or disable Lua In XProxyc.")
+option_end()
+
 -- common area   begin
 
 -- disable some warn
@@ -23,6 +37,10 @@ add_includedirs("src/spdlog-1.0.0/include", "src")
 -- add package
 add_packages("libhv")
 
+
+if has_config("XProxysOpenLua") or has_config("XProxycOpenLua") then
+    add_requires("lua")
+end
 -- common area   end
 
 
@@ -30,9 +48,15 @@ target("XProxys")
     set_kind("binary")
     add_files("src/server.cpp", "src/server_module/*.cpp")
     add_includedirs("src/server_module")
+    if has_config("XProxysOpenLua") then
+        add_packages("lua")
+    end
 
 
 target("XProxyc")
     set_kind("binary")
     add_files("src/client.cpp", "src/client_module/*.cpp")
     add_includedirs("src/client_module")
+    if has_config("XProxycOpenLua") then
+        add_packages("lua")
+    end
