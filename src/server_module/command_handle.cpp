@@ -112,13 +112,19 @@ void XproxyOnClose(hio_t *io){
     clients_table.erase(id);
 }
 
+static void XProxycWriteCallBack(hio_t* io, const void* buf, int writebytes){
+    // when write success, just close it
+    hio_close(io);
+}
+
 static void HandleLogin(const ProjectProtocol_t* payload, hio_t *io){
     nlohmann::json data;
     try{
         data = nlohmann::json::parse((const char*)payload->param);
     } catch(...){
-        // 非法的 json 数据
-        CodecBuf_t send_buf = PackageLoginRspCommand(0x01);
+        // invaild json data
+        CodecBuf_t send_buf = PackageLoginRspCommand(LOGIN_FAILD_CODE);
+        hio_setcb_write(io, XProxycWriteCallBack);
         hio_write(io, send_buf.buf, send_buf.len);
         return;
     }
@@ -126,7 +132,13 @@ static void HandleLogin(const ProjectProtocol_t* payload, hio_t *io){
 #ifdef ENABLE_LUA
     // call lua script frist to check 
     ServerLoaderParam_t *param = (ServerLoaderParam_t *)hloop_userdata(hevent_loop(io));
-    CallXProxycConnectHandle(param->lua_state, (const char*)payload->param);
+    if( CallXProxycConnectHandle(param->lua_state, (const char*)payload->param) != 0 ){
+        // lua script reject connect
+        CodecBuf_t send_buf = PackageLoginRspCommand(LOGIN_REJECT_BY_LUA_SCRIPT);
+        hio_setcb_write(io, XProxycWriteCallBack);
+        hio_write(io, send_buf.buf, send_buf.len);
+        return;
+    }
 #endif
 
 
@@ -170,7 +182,7 @@ static void HandleLogin(const ProjectProtocol_t* payload, hio_t *io){
     }
 
     // 进行回复
-    CodecBuf_t send_buf = PackageLoginRspCommand(0x00);
+    CodecBuf_t send_buf = PackageLoginRspCommand(LOGIN_SUCCESS_CODE);
     hio_write(io, send_buf.buf, send_buf.len);
 }
 
