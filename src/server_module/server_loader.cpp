@@ -13,15 +13,15 @@ unpack_setting_t unpack_setting;
 
 
 static void on_close(hio_t* io) {
-    DEBUG("on_close fd={} error={}\n", hio_fd(io), hio_error(io));
+    DEBUG("on_close fd={} error={}", hio_fd(io), hio_error(io));
     XproxyOnClose(io);
 }
 
 static void on_recv(hio_t* io, void* buf, int readbytes) {
-    DEBUG("on_recv fd={} readbytes={}\n", hio_fd(io), readbytes);
+    DEBUG("on_recv fd={} readbytes={}", hio_fd(io), readbytes);
     char localaddrstr[SOCKADDR_STRLEN] = {0};
     char peeraddrstr[SOCKADDR_STRLEN] = {0};
-    DEBUG("[%s] <=> [%s]\n",
+    DEBUG("[%s] <=> [%s]",
             SOCKADDR_STR(hio_localaddr(io), localaddrstr),
             SOCKADDR_STR(hio_peeraddr(io), peeraddrstr));
     CommandHandle((char*)buf, readbytes, io);
@@ -29,10 +29,10 @@ static void on_recv(hio_t* io, void* buf, int readbytes) {
 
 
 static void on_accept(hio_t* io) {
-    DEBUG("on_accept connfd={}\n", hio_fd(io));
+    DEBUG("on_accept connfd={}", hio_fd(io));
     char localaddrstr[SOCKADDR_STRLEN] = {0};
     char peeraddrstr[SOCKADDR_STRLEN] = {0};
-    DEBUG("accept connfd={} [{}] <= [{}]\n", hio_fd(io),
+    DEBUG("accept connfd={} [{}] <= [{}]", hio_fd(io),
             SOCKADDR_STR(hio_localaddr(io), localaddrstr),
             SOCKADDR_STR(hio_peeraddr(io), peeraddrstr));
 
@@ -47,9 +47,9 @@ void ServerLoader(ServerLoaderParam_t *param) {
     std::string host = param->ini_parser->GetValue("host", "common");
     int port = param->ini_parser->Get<int>("port", "common");
     SET_LOG_LEVEL(spdlog::level::debug);
-    DEBUG("host : {}:{}\n", host.c_str(), port);
+    DEBUG("host : {}:{}", host.c_str(), port);
 
-    INFO("lua file name {}\n", param->ini_parser->GetValue("lua_file_path", "common"));
+    INFO("lua file name {}", param->ini_parser->GetValue("lua_file_path", "common"));
 
     hloop_t* loop = hloop_new(0);
     hio_t* listenio = hloop_create_tcp_server(loop, "0.0.0.0", port, on_accept);

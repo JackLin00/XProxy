@@ -3,7 +3,10 @@
 #include <stdio.h>
 #include "hv/hv.h"
 #include "hv/hloop.h"
+#include "hv/htime.h"
+#include "user_log.h"
 
+#define    DEFAULT_RECONNECT_TIME                            20
 
 hio_t *connect_xproxys_io = NULL;
 
@@ -13,8 +16,7 @@ static void on_message(hio_t* io, void* buf, int len) {
 }
 
 static void on_connect(hio_t* io) {
-    IniParser* parser = (IniParser*)hevent_userdata(io);
-    printf("onconnect: connfd=%d\n", hio_fd(io));
+    ClientLoaderParam_t* client_param = (ClientLoaderParam_t*)hevent_userdata(io);
     static unpack_setting_t s_unpack_setting;
     s_unpack_setting.mode = UNPACK_BY_DELIMITER;
     s_unpack_setting.package_max_length = DEFAULT_PACKAGE_MAX_LENGTH;
@@ -25,32 +27,63 @@ static void on_connect(hio_t* io) {
     hio_setcb_read(io, on_message);
     hio_read(io);
 
-    SendLoginCommand(parser, io);
+    SendLoginCommand(client_param->ini_parser, io);
+}
+
+static void on_close(hio_t* io);
+
+static void ReconnectTimerCallback(htimer_t* timer){
+    ClientLoaderParam_t* client_param = (ClientLoaderParam_t*)hevent_userdata(timer);
+    std::string host = client_param->ini_parser->GetValue("server_host");
+    int port = client_param->ini_parser->Get<int>("server_port");
+
+    auto connect_xproxys_io = hio_create_socket(client_param->loop, host.c_str(), port, HIO_TYPE_TCP, HIO_CLIENT_SIDE);
+    if( connect_xproxys_io == NULL ){
+        ERROR("error, can't connect socket");
+        exit(-1);
+    }
+
+    hevent_set_userdata(connect_xproxys_io, client_param);
+    hio_setcb_connect(connect_xproxys_io, on_connect);
+    hio_setcb_close(connect_xproxys_io, on_close);
+    hio_connect(connect_xproxys_io);
+    DEBUG("reconnecting XProxys");
 }
 
 static void on_close(hio_t* io) {
-    printf("onclose: connfd=%d error=%d\n", hio_fd(io), hio_error(io));
+    ClientLoaderParam_t* client_param = (ClientLoaderParam_t*)hevent_userdata(io);
+    int interval = client_param->ini_parser->Get<int>("reconnect_interval", "", DEFAULT_RECONNECT_TIME);
+    INFO("disconnect from XProxyc, reconnect interval : {}s", interval);
+    htimer_t* timer = htimer_add(client_param->loop, ReconnectTimerCallback, interval * 1000, 1);
+    if( timer == NULL ){
+        ERROR("Can't create timer.exiting....");
+        exit(-1);
+    }
+
+    hevent_set_userdata(timer, client_param);
 }
 
-void ClientLoader(IniParser *parser){
+void ClientLoader(ClientLoaderParam_t *param){
     hloop_t *loop = NULL;
-    std::string host = parser->GetValue("server_host");
-    int port = parser->Get<int>("server_port");
+    std::string host = param->ini_parser->GetValue("server_host");
+    int port = param->ini_parser->Get<int>("server_port");
 
-    printf("server url : %s:%d\n", host.c_str(), port);
+    INFO("server url : %s:%d", host.c_str(), port);
     // 连接服务器
     loop = hloop_new(0);
     if( loop == NULL ){
-        printf("error, can't create hloop\n");
+        ERROR("error, can't create hloop");
         exit(-1);
     }
 
+    param->loop = loop;
+
     connect_xproxys_io = hio_create_socket(loop, host.c_str(), port, HIO_TYPE_TCP, HIO_CLIENT_SIDE);
     if( connect_xproxys_io == NULL ){
-        printf("error, can't connect socket\n");
+        ERROR("error, can't connect socket");
         exit(-1);
     }
-    hevent_set_userdata(connect_xproxys_io, parser);
+    hevent_set_userdata(connect_xproxys_io, param);
     hio_setcb_connect(connect_xproxys_io, on_connect);
     hio_setcb_close(connect_xproxys_io, on_close);
     hio_connect(connect_xproxys_io);

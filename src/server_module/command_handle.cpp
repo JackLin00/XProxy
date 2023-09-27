@@ -29,7 +29,7 @@ static void ProxyOnClose(hio_t *io){
     CodecBuf_t send_buf = PackageServiceClientOnDisConnectCommand(client_id, clients_server_map[local_port].service_index);
     hio_write(clients_server_map[local_port].parent_io, send_buf.buf, send_buf.len);
     clients_server_map.erase(client_id);
-    INFO("active disconnect, client id :{}, service id :{}\n", client_id, clients_server_map[local_port].service_index);
+    INFO("active disconnect, client id :{}, service id :{}", client_id, clients_server_map[local_port].service_index);
 }
 
 
@@ -43,7 +43,7 @@ static void ProxyOnData(hio_t *io, void* buf, int readbytes){
 static void ProxyOnAccet(hio_t* io) {
     char localaddrstr[SOCKADDR_STRLEN] = {0};
     char peeraddrstr[SOCKADDR_STRLEN] = {0};
-    DEBUG("accept connfd={} [{}] <= [{}]\n", hio_fd(io),
+    DEBUG("accept connfd={} [{}] <= [{}]", hio_fd(io),
             SOCKADDR_STR(hio_localaddr(io), localaddrstr),
             SOCKADDR_STR(hio_peeraddr(io), peeraddrstr));
 
@@ -79,17 +79,17 @@ void CommandHandle(char *buf, int len, hio_t *io){
     const ProjectProtocol_t *recv_payload = (const ProjectProtocol_t *)recv_data.buf;
 
     if( calc_sum != recv_payload->checksum ){
-        ERROR("check sum error. calc : [{:x}], real : [{:x}]\n", calc_sum, recv_payload->checksum);
+        ERROR("check sum error. calc : [{:x}], real : [{:x}]", calc_sum, recv_payload->checksum);
         return;
     }
 
 #ifdef DEBUG_FLAG
-    printf("get cmd : %x -- (%d:%d)\n", recv_payload->cmd, recv_payload->len, len);
+    printf("get cmd : %x -- (%d:%d)", recv_payload->cmd, recv_payload->len, len);
     for( int i = 0; i < recv_data.len; i++ ){
-        if( i % 16 == 0)   printf("\n");
+        if( i % 16 == 0)   printf("");
         printf("%02x ", recv_data.buf[i]);
     }
-    printf("\n");
+    printf("");
 #endif
 
 
@@ -175,9 +175,9 @@ static void HandleLogin(const ProjectProtocol_t* payload, hio_t *io){
     clients_table[hio_id(io)] = std::move(service_info);
 
     for( auto &item : clients_table ){
-        DEBUG("id : {}:\n", item.first);
+        DEBUG("id : {}:", item.first);
         for( auto list_item : item.second.service_list ){
-            DEBUG("index : {}, service name : {}, service port : {}, server port : {}\n", list_item.index, list_item.service_name.c_str(), list_item.service_port, list_item.server_port);
+            DEBUG("index : {}, service name : {}, service port : {}, server port : {}", list_item.index, list_item.service_name.c_str(), list_item.service_port, list_item.server_port);
         }
     }
 
@@ -191,7 +191,7 @@ static void HandleLogin(const ProjectProtocol_t* payload, hio_t *io){
 static void HandleSubServiceDisConnect(const ProjectProtocol_t* payload, hio_t *io){
     uint32_t client_id = GetU32FromBuffer((unsigned char*)payload->param);
     uint32_t service_id = GetU32FromBuffer((unsigned char*)&payload->param[4]);
-    DEBUG("passivity disconnect client id : {}, service id : {}\n", client_id, service_id);
+    DEBUG("passivity disconnect client id : {}, service id : {}", client_id, service_id);
     hio_close(subservice_clients[client_id]);
 }
 
@@ -200,7 +200,7 @@ static void HandleSubServiceOnData(const ProjectProtocol_t* payload, hio_t* io){
     uint32_t client_id = GetU32FromBuffer((unsigned char*)payload->param);
     uint32_t service_id = GetU32FromBuffer((unsigned char*)&payload->param[4]);
 
-    DEBUG("on data client id : {}, service id :{}, send len : {}\n", client_id, service_id, payload->len - PROTOCOL_BASE_LEN - 8);
+    DEBUG("on data client id : {}, service id :{}, send len : {}", client_id, service_id, payload->len - PROTOCOL_BASE_LEN - 8);
     // 将数据写入到对应句柄中 
     hio_write(subservice_clients[client_id], (const void*)&payload->param[8], payload->len - PROTOCOL_BASE_LEN - 8);
 }

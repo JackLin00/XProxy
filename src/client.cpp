@@ -31,6 +31,7 @@ void PrintVersion() {
 
 int main(int argc, char** argv) {
     IniParser conf_file_handle;
+    ClientLoaderParam_t load_param; 
     hlog_set_file("XproxyC");
     int ret = parse_opt_long(argc, argv, long_options, ARRAY_SIZE(long_options));
     if (ret != 0) {
@@ -60,7 +61,9 @@ int main(int argc, char** argv) {
         exit(0);
     }
 
-    ClientLoader(&conf_file_handle);
+    load_param.ini_parser = &conf_file_handle;
+
+    ClientLoader(&load_param);
 
     return 0;
 }

@@ -22,11 +22,11 @@ class DefaultLogger{
 };
 
 
-#define     TRACE(...)            DefaultLogger::GetLoggerHandle()->trace(__VA_ARGS__)
-#define     DEBUG(...)            DefaultLogger::GetLoggerHandle()->debug(__VA_ARGS__)
-#define     INFO(...)             DefaultLogger::GetLoggerHandle()->info(__VA_ARGS__)
-#define     WARN(...)             DefaultLogger::GetLoggerHandle()->warn(__VA_ARGS__)
-#define     ERROR(...)            DefaultLogger::GetLoggerHandle()->error(__VA_ARGS__)
-#define     SET_LOG_LEVEL(level)  DefaultLogger::GetLoggerHandle()->set_level(level)
+#define     TRACE(format, ...)            DefaultLogger::GetLoggerHandle()->trace(format , ##__VA_ARGS__)
+#define     DEBUG(format, ...)            DefaultLogger::GetLoggerHandle()->debug(format , ##__VA_ARGS__)
+#define     INFO(format, ...)             DefaultLogger::GetLoggerHandle()->info(format , ##__VA_ARGS__)
+#define     WARN(format, ...)             DefaultLogger::GetLoggerHandle()->warn(format , ##__VA_ARGS__)
+#define     ERROR(format, ...)            DefaultLogger::GetLoggerHandle()->error(format , ##__VA_ARGS__)
+#define     SET_LOG_LEVEL(level)          DefaultLogger::GetLoggerHandle()->set_level(level)
 
 #endif

@@ -8,23 +8,23 @@ extern hio_t *connect_xproxys_io;
 
 static void on_message(hio_t* io, void* buf, int len) {
     SubServiceTcp *handle = (SubServiceTcp*)hevent_userdata(io);
-    INFO("subservice tcp get data, client id : {}, service id: {}, len : {}\n", handle->self_client_id, handle->self_service_id, len);
+    INFO("subservice tcp get data, client id : {}, service id: {}, len : {}", handle->self_client_id, handle->self_service_id, len);
 #ifdef DEBUG_FLAG
     uint8_t *p = (uint8_t *)buf;
     for( int i = 0; i < len; i++){
-        if( i % 16 == 0 )   printf("\n");
+        if( i % 16 == 0 )   printf("");
         printf("%02x ", p[i]);
     }
-    printf("\n");
+    printf("");
 #endif
 
     CodecBuf_t send_data = PackageSubServiceOnData(handle->self_client_id, handle->self_service_id, (unsigned char*)buf, len);
 #ifdef DEBUG_FLAG
     for( int i = 0; i < send_data.len; i++){
-        if( i % 16 == 0 )   printf("\n");
+        if( i % 16 == 0 )   printf("");
         printf("%02x ", send_data.buf[i]);
     }
-    printf("\n");
+    printf("");
 #endif
 
     hio_write(connect_xproxys_io, send_data.buf, send_data.len);
@@ -65,7 +65,7 @@ SubServiceTcp::~SubServiceTcp(){
         hevent_set_userdata(self_io, NULL);
         hio_close(self_io);
     }
-    INFO("subservice tcp delete, client id : {}, service id: {}\n", self_client_id, self_service_id);
+    INFO("subservice tcp delete, client id : {}, service id: {}", self_client_id, self_service_id);
 }
 
 
