@@ -1,18 +1,16 @@
 add_rules("mode.debug", "mode.release")
-set_warnings("all", "error")
+-- set_warnings("all", "error")
 
 add_requires("libhv")
-set_languages("cxx11", "c99")
 
-
-option("XProxysOpenLua")
+option("EnableXProxysLua")
     set_default(false)
     set_showmenu(true)
     set_category("option")
     set_description("Enable or disable Lua In XProxys.")
 option_end()
 
-option("XProxycOpenLua")
+option("EnableXProxycLua")
     set_default(false)
     set_showmenu(true)
     set_category("option")
@@ -38,7 +36,7 @@ add_includedirs("src/spdlog-1.0.0/include", "src")
 add_packages("libhv")
 
 
-if has_config("XProxysOpenLua") or has_config("XProxycOpenLua") then
+if has_config("EnableXProxysLua") or has_config("EnableXProxycLua") then
     add_requires("lua")
 end
 -- common area   end
@@ -48,8 +46,13 @@ target("XProxys")
     set_kind("binary")
     add_files("src/server.cpp", "src/server_module/*.cpp")
     add_includedirs("src/server_module")
-    if has_config("XProxysOpenLua") then
+    set_languages("cxx17")
+    if has_config("EnableXProxysLua") then
         add_packages("lua")
+        add_defines("ENABLE_LUA")
+        add_defines("USE_INTERNAL_FPCONV", "NDEBUG")
+        add_files("src/lua-cjson/*.c|fpconv.c")
+        add_files("src/server_module/lua_module_s.c")
     end
 
 
@@ -57,6 +60,8 @@ target("XProxyc")
     set_kind("binary")
     add_files("src/client.cpp", "src/client_module/*.cpp")
     add_includedirs("src/client_module")
-    if has_config("XProxycOpenLua") then
+    set_languages("cxx11")                                    -- 客户端这边现阶段需要尽量使用较低的 c++ 标准,以兼容尽可能的设备
+    if has_config("EnableXProxycLua") then
         add_packages("lua")
+        add_defines("ENABLE_LUA")
     end

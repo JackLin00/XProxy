@@ -7,6 +7,10 @@
 #include "client_item_type.h"
 #include "command_package.h"
 #include "project_conf.h"
+#include "server_loader.h"
+#ifdef ENABLE_LUA
+#include "lua_module_s.h"
+#endif
 #include <stdio.h>
 #include <iostream>
 #include <unordered_map>
@@ -118,6 +122,14 @@ static void HandleLogin(const ProjectProtocol_t* payload, hio_t *io){
         hio_write(io, send_buf.buf, send_buf.len);
         return;
     }
+
+#ifdef ENABLE_LUA
+    // call lua script frist to check 
+    ServerLoaderParam_t *param = (ServerLoaderParam_t *)hloop_userdata(hevent_loop(io));
+    CallXProxycConnectHandle(param->lua_state, (const char*)payload->param);
+#endif
+
+
     // 创建服务
     int service_len = data["info"].size();
     ClientServiceInfo_t service_info;
