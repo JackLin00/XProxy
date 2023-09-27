@@ -21,7 +21,7 @@ static void on_recv(hio_t* io, void* buf, int readbytes) {
     DEBUG("on_recv fd={} readbytes={}", hio_fd(io), readbytes);
     char localaddrstr[SOCKADDR_STRLEN] = {0};
     char peeraddrstr[SOCKADDR_STRLEN] = {0};
-    DEBUG("[%s] <=> [%s]",
+    DEBUG("[{}] <=> [{}]",
             SOCKADDR_STR(hio_localaddr(io), localaddrstr),
             SOCKADDR_STR(hio_peeraddr(io), peeraddrstr));
     CommandHandle((char*)buf, readbytes, io);
