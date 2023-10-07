@@ -51,7 +51,7 @@ target("XProxys")
         add_packages("lua")
         add_defines("ENABLE_LUA")
         add_defines("USE_INTERNAL_FPCONV", "NDEBUG")
-        add_files("src/lua-cjson/*.c|fpconv.c")
+        add_files("src/lua_module/lua-cjson/*.c|fpconv.c")
         add_files("src/server_module/lua_module_s.c")
     end
 
