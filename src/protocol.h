@@ -3,6 +3,7 @@
 
 
 #include <stdint.h>
+#include <assert.h>
 #include "hv/hloop.h"
 
 #define  TAIL_CHAR               0x7E
@@ -47,6 +48,7 @@ void PaddingCmdAndLen(unsigned char *buffer, uint16_t cmd, uint16_t len);
 
 #define        PACKAGE_DATA_START(cmd, len)           uint16_t malloc_len = sizeof(ProjectProtocol_t) + (len);           \
                                                       unsigned char *p_buffer = (unsigned char*)malloc(malloc_len);      \
+                                                      assert(p_buffer != NULL);                                          \
                                                       unsigned char *fix_p_buffer = p_buffer;                            \
                                                       std::unique_ptr<unsigned char, decltype(&CAutoFreeFunc)> smart_ptr(fix_p_buffer, CAutoFreeFunc);    \
                                                       PaddingCmdAndLen(p_buffer, (cmd), (malloc_len));                          \

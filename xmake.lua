@@ -24,7 +24,7 @@ add_cxflags("-Wno-sign-compare")
 add_defines("_GLIBCXX_USE_SCHED_YIELD", "_GLIBCXX_USE_NANOSLEEP")
 
 if is_mode("debug") then
-    add_defines("DEBUG_FLAG")
+    -- add_defines("DEBUG_FLAG")
 end
 
 -- add file 

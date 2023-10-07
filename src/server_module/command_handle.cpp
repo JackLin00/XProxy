@@ -26,10 +26,14 @@ static std::unordered_map<uint32_t, hio_t*> subservice_clients;
 static void ProxyOnClose(hio_t *io){
     int local_port = ntohs(((struct sockaddr_in*)hio_localaddr(io))->sin_port);
     uint32_t client_id = hio_id(io);
-    CodecBuf_t send_buf = PackageServiceClientOnDisConnectCommand(client_id, clients_server_map[local_port].service_index);
-    hio_write(clients_server_map[local_port].parent_io, send_buf.buf, send_buf.len);
-    clients_server_map.erase(client_id);
-    INFO("active disconnect, client id :{}, service id :{}", client_id, clients_server_map[local_port].service_index);
+
+    if(clients_server_map.count(local_port) > 0 && !hio_is_closed(clients_server_map[local_port].parent_io)){
+        // parent io is not close
+        CodecBuf_t send_buf = PackageServiceClientOnDisConnectCommand(client_id, clients_server_map[local_port].service_index);
+        hio_write(clients_server_map[local_port].parent_io, send_buf.buf, send_buf.len);
+    }
+
+    DEBUG("disconnect, client id :{}, service id :{}, io : {}", client_id, clients_server_map[local_port].service_index, fmt::ptr(io));
 }
 
 
@@ -37,13 +41,19 @@ static void ProxyOnData(hio_t *io, void* buf, int readbytes){
     int local_port = ntohs(((struct sockaddr_in*)hio_localaddr(io))->sin_port);
     uint32_t client_id = hio_id(io);
     CodecBuf_t send_buf = PackageServiceClientOnDataCommand(client_id, clients_server_map[local_port].service_index, (const char*)buf, readbytes);
-    hio_write(clients_server_map[local_port].parent_io, send_buf.buf, send_buf.len);
+    if(hio_is_closed(clients_server_map[local_port].parent_io)){
+        // when parent io is close ?
+        hio_close(io);                              // close self
+        clients_server_map.erase(local_port);       // delete this data
+    } else {
+        hio_write(clients_server_map[local_port].parent_io, send_buf.buf, send_buf.len);
+    }
 }
 
 static void ProxyOnAccet(hio_t* io) {
     char localaddrstr[SOCKADDR_STRLEN] = {0};
     char peeraddrstr[SOCKADDR_STRLEN] = {0};
-    DEBUG("accept connfd={} [{}] <= [{}]", hio_fd(io),
+    DEBUG("proxy accept connfd={} [{}] <= [{}]", hio_fd(io),
             SOCKADDR_STR(hio_localaddr(io), localaddrstr),
             SOCKADDR_STR(hio_peeraddr(io), peeraddrstr));
 
@@ -58,6 +68,7 @@ static void ProxyOnAccet(hio_t* io) {
     int local_port = ntohs(((struct sockaddr_in*)hio_localaddr(io))->sin_port);
     CodecBuf_t send_buf = PackageServiceClientOnConnectCommand(client_id, clients_server_map[local_port].service_index);
     hio_write(clients_server_map[local_port].parent_io, send_buf.buf, send_buf.len);
+    clients_server_map[local_port].client_list.push_front(io);
 }
 
 static void HandleLogin(const ProjectProtocol_t*, hio_t *);
@@ -104,6 +115,13 @@ void XproxyOnClose(hio_t *io){
     uint32_t id = hio_id(io);
     auto &services = clients_table[id];
     for( auto index : services.service_list ){
+        // 关闭已经连接该服务的所有子连接
+        for( auto &client_item : clients_server_map[index.server_port].client_list ){
+            hio_close(client_item);
+        }
+
+        // clear data
+        clients_server_map.erase(index.server_port);
         // 关闭所有已经打开的服务
         hio_close(index.io);
     }
@@ -177,7 +195,7 @@ static void HandleLogin(const ProjectProtocol_t* payload, hio_t *io){
     for( auto &item : clients_table ){
         DEBUG("id : {}:", item.first);
         for( auto list_item : item.second.service_list ){
-            DEBUG("index : {}, service name : {}, service port : {}, server port : {}", list_item.index, list_item.service_name.c_str(), list_item.service_port, list_item.server_port);
+            INFO("index : {}, service name : {}, service port : {}, server port : {}", list_item.index, list_item.service_name.c_str(), list_item.service_port, list_item.server_port);
         }
     }
 

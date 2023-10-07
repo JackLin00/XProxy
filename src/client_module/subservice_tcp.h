@@ -9,7 +9,7 @@
 
 class SubServiceTcp : public SubServiceBaseClass{
     public:
-        DisconnectCallBackFunc_t func{NULL};
+        DisconnectCallBackFunc_t _func{NULL};
 
         SubServiceTcp(std::string url, int port, uint32_t client_id, uint32_t service_id, hio_t *io, DisconnectCallBackFunc_t func);
         SubServiceTcp(const SubServiceTcp &) = delete;

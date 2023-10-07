@@ -161,7 +161,7 @@ static void HandleClientDisconnect(const ProjectProtocol_t* payload, hio_t *io){
 static void HandleClientData(const ProjectProtocol_t* payload, hio_t *io){
     uint32_t client_id = GetU32FromBuffer((unsigned char*)payload->param);
     uint32_t service_id = GetU32FromBuffer((unsigned char*)&payload->param[4]);
-    INFO("on data client id : {}, service id : {}", client_id, service_id);
+    DEBUG("on data client id : {}, service id : {}", client_id, service_id);
 
     if( ServiceTable[service_id].type == 0 ){
         // TCP 

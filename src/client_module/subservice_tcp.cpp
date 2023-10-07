@@ -8,7 +8,7 @@ extern hio_t *connect_xproxys_io;
 
 static void on_message(hio_t* io, void* buf, int len) {
     SubServiceTcp *handle = (SubServiceTcp*)hevent_userdata(io);
-    INFO("subservice tcp get data, client id : {}, service id: {}, len : {}", handle->self_client_id, handle->self_service_id, len);
+    DEBUG("subservice tcp get data, client id : {}, service id: {}, len : {}", handle->self_client_id, handle->self_service_id, len);
 #ifdef DEBUG_FLAG
     uint8_t *p = (uint8_t *)buf;
     for( int i = 0; i < len; i++){
@@ -33,7 +33,7 @@ static void on_message(hio_t* io, void* buf, int len) {
 SubServiceTcp::SubServiceTcp(std::string url, int port, uint32_t client_id, uint32_t service_id, hio_t *io, DisconnectCallBackFunc_t func) {
     self_client_id = client_id;
     self_service_id = service_id;
-    func = func;
+    _func = func;
     self_io = hloop_create_tcp_client(hevent_loop(io), url.c_str(), port, 
     // 连接上的 callback
     [](hio_t *io){
@@ -53,8 +53,8 @@ SubServiceTcp::SubServiceTcp(std::string url, int port, uint32_t client_id, uint
         hio_write(connect_xproxys_io, send_data.buf, send_data.len);
         hio_close(handle->self_io);
         handle->self_io = NULL;
-        if( handle->func != NULL ){
-            handle->func(handle->self_client_id, handle->self_service_id);
+        if( handle->_func != NULL ){
+            handle->_func(handle->self_client_id, handle->self_service_id);
         }
     });
     hevent_set_userdata(self_io, this);

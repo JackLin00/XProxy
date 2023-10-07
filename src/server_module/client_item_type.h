@@ -2,6 +2,7 @@
 #define __CLIENT_ITEM_TYPE_H__
 
 #include <forward_list>
+// #include <vector>
 #include <string>
 #include <stdint.h>
 #include "hv/hloop.h"
@@ -24,7 +25,8 @@ typedef struct ClientServiceInfo{
 
 typedef struct ClientServerMap{
     hio_t *parent_io;                           // 对应的父 IO handle
-    int service_index;                   // 对应的服务索引
+    int service_index;                          // 对应的服务索引
+    std::forward_list<hio_t*> client_list;      // 对应的子服务 io
 }ClientServerMap_t;
 
 

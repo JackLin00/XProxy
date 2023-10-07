@@ -46,7 +46,7 @@ static void on_accept(hio_t* io) {
 void ServerLoader(ServerLoaderParam_t *param) {
     std::string host = param->ini_parser->GetValue("host", "common");
     int port = param->ini_parser->Get<int>("port", "common");
-    SET_LOG_LEVEL(spdlog::level::debug);
+    SET_LOG_LEVEL(spdlog::level::info);
     DEBUG("host : {}:{}", host.c_str(), port);
 
     INFO("lua file name {}", param->ini_parser->GetValue("lua_file_path", "common"));

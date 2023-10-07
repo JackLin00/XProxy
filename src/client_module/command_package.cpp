@@ -32,7 +32,6 @@ CodecBuf_t PackageSubServiceOnDisConnect(uint32_t client_id, uint32_t service_id
 
 CodecBuf_t PackageSubServiceOnData(uint32_t client_id, uint32_t service_id, unsigned char *data, int data_len){
     PACKAGE_DATA_START(ON_DATA_CMD_RSP, sizeof(uint32_t) + sizeof(uint32_t) + data_len);
-    printf("xx len : %d\n", malloc_len);
     p_buffer += PaddingU32ToBuffer(p_buffer, client_id);
     p_buffer += PaddingU32ToBuffer(p_buffer, service_id);
 

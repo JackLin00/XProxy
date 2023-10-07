@@ -68,7 +68,7 @@ void ClientLoader(ClientLoaderParam_t *param){
     std::string host = param->ini_parser->GetValue("server_host");
     int port = param->ini_parser->Get<int>("server_port");
 
-    INFO("server url : %s:%d", host.c_str(), port);
+    INFO("server url : {}:{}", host, port);
     // 连接服务器
     loop = hloop_new(0);
     if( loop == NULL ){
