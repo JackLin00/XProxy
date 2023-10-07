@@ -14,6 +14,10 @@ CodecBuf_t PackageLoginReqCommand(std::string& login_string){
     PACKAGE_DATA_END();
 }
 
+CodecBuf_t PackageHeartBeatReqCommand(){
+    PACKAGE_DATA_START(HEARTBEAT_CMD_REQ, 0);
+    PACKAGE_DATA_END();
+}
 
 CodecBuf_t PackageSubServiceOnConnect(uint32_t client_id, uint32_t service_id){
     PACKAGE_DATA_START(CONNECT_CMD_RSP, sizeof(uint32_t) + sizeof(uint32_t));

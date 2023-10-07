@@ -7,6 +7,7 @@
 #include "command_package.h"
 #include "subservice_tcp.h"
 #include "hv/hdef.h"
+#include "client_loader.h"
 #include <vector>
 #include <stdlib.h>
 #include <string>
@@ -77,7 +78,7 @@ void SendLoginCommand(IniParser *parser, hio_t *io){
 
 // 客户端登陆相关
 static void HandleLoginRsp(const ProjectProtocol_t*, hio_t *io);
-
+static void HandleHeartBeatRsp(const ProjectProtocol_t*, hio_t *io);
 
 // 服务数据处理相关
 static void HandleClientConnect(const ProjectProtocol_t*, hio_t *io);
@@ -92,6 +93,7 @@ const CommandItem_t CommandTable[] = {
     {CONNECT_CMD_REQ, HandleClientConnect},
     {DISCONN_CMD_REQ, HandleClientDisconnect},
     {ON_DATA_CMD_REQ, HandleClientData},
+    {HEARTBEAT_CMD_RSP, HandleHeartBeatRsp},
 };
 
 
@@ -125,6 +127,11 @@ static void HandleLoginRsp(const ProjectProtocol_t* payload, hio_t *io){
     } else {
         INFO("login faild, code : {}", payload->param[0]);
     }
+}
+
+static void HandleHeartBeatRsp(const ProjectProtocol_t*, hio_t *io){
+    ClientLoaderParam_t* client_param = (ClientLoaderParam_t*)hevent_userdata(io);
+    client_param->heartbeat_handle->GetHeartBeatRsp();
 }
 
 static void HandleClientConnect(const ProjectProtocol_t* payload, hio_t *io){

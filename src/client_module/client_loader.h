@@ -3,10 +3,12 @@
 
 #include "hv/iniparser.h"
 #include "hv/hloop.h"
+#include "heartbeat.h"
 
 typedef struct ClientLoaderParam{
     IniParser *ini_parser;
     hloop_t *loop;
+    HeartBeat *heartbeat_handle;
     #ifdef ENABLE_LUA
     lua_State* lua_state{NULL}; 
     #endif

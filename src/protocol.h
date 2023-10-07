@@ -16,7 +16,9 @@
 #define         LOGIN_CMD_REQ                   0x0000              // xproxyc 登陆命令
 #define         LOGIN_CMD_RSP                   0x8000
 #define         LOGOUT_CMD_REQ                  0x0001              // xproxyc 登出命令
-#define         LOGOUT_CMD_RSP                  0x8001         
+#define         LOGOUT_CMD_RSP                  0x8001  
+#define         HEARTBEAT_CMD_REQ               0x0002              // xproxyc 心跳命令
+#define         HEARTBEAT_CMD_RSP               0x8002
 #define         CONNECT_CMD_REQ                 0x0010              // xproxys 有客户端连接上对应 socket
 #define         CONNECT_CMD_RSP                 0x8010              // xproxyc 成功连接上对应的服务器
 #define         ON_DATA_CMD_REQ                 0x0011              // xproxys 客户端有数据

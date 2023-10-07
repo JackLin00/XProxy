@@ -72,11 +72,13 @@ static void ProxyOnAccet(hio_t* io) {
 }
 
 static void HandleLogin(const ProjectProtocol_t*, hio_t *);
+static void HandleHeartBeat(const ProjectProtocol_t*, hio_t *);
 static void HandleSubServiceOnData(const ProjectProtocol_t*, hio_t *);
 static void HandleSubServiceDisConnect(const ProjectProtocol_t*, hio_t *);
 
 const CommandItem_t CommandTable[] = {
     {LOGIN_CMD_REQ, HandleLogin},
+    {HEARTBEAT_CMD_REQ, HandleHeartBeat},
     {ON_DATA_CMD_RSP, HandleSubServiceOnData},
     {DISCONN_CMD_RSP, HandleSubServiceDisConnect}
 };
@@ -201,6 +203,11 @@ static void HandleLogin(const ProjectProtocol_t* payload, hio_t *io){
 
     // 进行回复
     CodecBuf_t send_buf = PackageLoginRspCommand(LOGIN_SUCCESS_CODE);
+    hio_write(io, send_buf.buf, send_buf.len);
+}
+
+static void HandleHeartBeat(const ProjectProtocol_t* payload, hio_t *io){
+    CodecBuf_t send_buf = PackageHeartBeatRspCommand();
     hio_write(io, send_buf.buf, send_buf.len);
 }
 

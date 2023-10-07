@@ -9,6 +9,11 @@ CodecBuf_t PackageLoginRspCommand(uint8_t status){
     PACKAGE_DATA_END();
 }
 
+CodecBuf_t PackageHeartBeatRspCommand(){
+    PACKAGE_DATA_START(HEARTBEAT_CMD_RSP, 0);
+    PACKAGE_DATA_END();
+}
+
 CodecBuf_t PackageServiceClientOnConnectCommand(uint32_t client_id, uint32_t service_id){
     PACKAGE_DATA_START(CONNECT_CMD_REQ, sizeof(uint32_t) + sizeof(uint32_t));
     // 设置 client id 和 service id

@@ -5,10 +5,12 @@
 #include "hv/hloop.h"
 #include "hv/htime.h"
 #include "user_log.h"
+#include "heartbeat.h"
 
 #define    DEFAULT_RECONNECT_TIME                            20
 
 hio_t *connect_xproxys_io = NULL;
+static HeartBeat* heartbeat_handle{nullptr};
 
 
 static void on_message(hio_t* io, void* buf, int len) {
@@ -28,6 +30,9 @@ static void on_connect(hio_t* io) {
     hio_read(io);
 
     SendLoginCommand(client_param->ini_parser, io);
+
+    heartbeat_handle = new HeartBeat(client_param->loop, io);
+    client_param->heartbeat_handle = heartbeat_handle;
 }
 
 static void on_close(hio_t* io);
@@ -61,6 +66,8 @@ static void on_close(hio_t* io) {
     }
 
     hevent_set_userdata(timer, client_param);
+    delete heartbeat_handle;
+    heartbeat_handle = nullptr;
 }
 
 void ClientLoader(ClientLoaderParam_t *param){

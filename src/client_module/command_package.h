@@ -8,7 +8,7 @@
 
 
 CodecBuf_t PackageLoginReqCommand(std::string& login_string);
-
+CodecBuf_t PackageHeartBeatReqCommand();
 
 
 
