@@ -1,15 +1,15 @@
-#include "command_handle.h"
+#include "command_handle_s.h"
 #include "user_log.h"
 #include "cmd_codec.h"
 #include "hv/json.hpp"
 #include "hv/hbase.h"
 #include "hv/hsocket.h"
 #include "client_item_type.h"
-#include "command_package.h"
+#include "command_package_s.h"
 #include "project_conf.h"
 #include "server_loader.h"
 #ifdef ENABLE_LUA
-#include "lua_module_s.h"
+#include "load_lua_s.h"
 #endif
 #include <stdio.h>
 #include <iostream>

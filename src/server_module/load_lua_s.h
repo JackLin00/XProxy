@@ -1,5 +1,6 @@
-#ifndef __LUA_MODULE_S_H__
-#define __LUA_MODULE_S_H__
+#ifndef __LOAD_LUA_S_H__
+#define __LOAD_LUA_S_H__
+
 
 #ifdef __cplusplus
 extern "C"{

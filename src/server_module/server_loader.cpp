@@ -5,7 +5,7 @@
 #include "server_loader.h"
 #include "user_log.h"
 #include "cmd_codec.h"
-#include "command_handle.h"
+#include "command_handle_s.h"
 #include <stdio.h>
 #include <string>
 

@@ -1,5 +1,5 @@
-#ifndef __COMMAND_PACKAGE_H__
-#define __COMMAND_PACKAGE_H__
+#ifndef __COMMAND_PACKAGE_C_H__
+#define __COMMAND_PACKAGE_C_H__
 
 #include "cmd_codec.h"
 #include <stdint.h>

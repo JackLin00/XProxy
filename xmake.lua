@@ -1,7 +1,7 @@
 add_rules("mode.debug", "mode.release")
 set_warnings("all", "error")
 
-add_requires("libhv")
+add_requires("libhv", {configs = {openssl = true}})
 
 option("EnableXProxysLua")
     set_default(false)
@@ -15,6 +15,19 @@ option("EnableXProxycLua")
     set_showmenu(true)
     set_category("option")
     set_description("Enable or disable Lua In XProxyc.")
+option_end()
+
+option("EnableXProxysRequests")
+    set_default(false)
+    set_showmenu(true)
+    set_category("option")
+    add_deps("EnableXProxysLua")
+    set_description("Enable or disable Lua In XProxys request lib.")
+    after_check(function (option)
+        if not option:dep("EnableXProxysLua"):enabled() then
+            option:dep("EnableXProxysLua"):enable(true)
+        end
+    end)
 option_end()
 
 -- common area   begin
@@ -52,7 +65,15 @@ target("XProxys")
         add_defines("ENABLE_LUA")
         add_defines("USE_INTERNAL_FPCONV", "NDEBUG")
         add_files("src/lua_module/lua-cjson/*.c|fpconv.c")
-        add_files("src/server_module/lua_module_s.c")
+        add_files("src/server_module/load_lua_s.c")
+
+        -- add user print
+        add_files("src/lua_module/lua-print/*.c")
+    end
+
+    if has_config("EnableXProxysRequests") then
+        add_files("src/lua_module/lua-requests/*.cpp")
+        add_defines("ENABLE_LUA_REQUESTS")
     end
 
 

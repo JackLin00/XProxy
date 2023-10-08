@@ -1,5 +1,6 @@
-#ifndef __COMMAND_HANDLE_H__
-#define __COMMAND_HANDLE_H__
+#ifndef __COMMAND_HANDLE_S_H__
+#define __COMMAND_HANDLE_S_H__
+
 
 #include "hv/hloop.h"
 

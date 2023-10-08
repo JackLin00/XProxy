@@ -4,7 +4,7 @@
 #include "hv/iniparser.h"
 
 #ifdef ENABLE_LUA
-#include "lua_module_s.h"
+#include "load_lua_s.h"
 #endif
 
 typedef struct ServerLoaderParam{

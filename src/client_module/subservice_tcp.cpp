@@ -1,5 +1,5 @@
 #include "subservice_tcp.h"
-#include "command_package.h"
+#include "command_package_c.h"
 #include "user_log.h"
 
 extern hio_t *connect_xproxys_io;

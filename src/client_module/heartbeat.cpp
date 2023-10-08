@@ -1,7 +1,7 @@
 #include "heartbeat.h"
 #include <ctime>
 #include <stdexcept>
-#include "command_package.h"
+#include "command_package_c.h"
 #include "user_log.h"
 
 #define   HEARTBEAT_TIMEOUT                    10000
