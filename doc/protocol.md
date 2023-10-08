@@ -99,6 +99,44 @@
 
 
 
+##### XProxyc 心跳命令
+
+该命令是由 `XProxyc` 向 `XProxys` 发送
+
+需要注意的是，若 `XProxyc` 在 15S 内没有获取到心跳返回，则会主动断开，然后重连
+
+命令格式如下：
+
+| cmd    | len    | checksum | param  | tail   |
+| ------ | ------ | -------- | ------ | ------ |
+| 0x0002 | X      | X        | null   | 0x7E   |
+| 2 Byte | 2 Byte | 2 Byte   | 0 Byte | 1 Byte |
+
+* cmd ：该命令的ID
+* len：该命令的长度，会根据实际的 param 来进行填充
+* checksum ：该命令的校验和，会根据实际的 param 来进行填充
+* param：无
+* tail ：数据帧的尾
+
+该命令的返回如下：
+
+| cmd    | len    | checksum | param  | tail  |
+| ------ | ------ | -------- | ------ | ----- |
+| 0x8002 | X      | X        | null   | 0x7e  |
+| 2 Byte | 2 Byte | 2 Byte   | 0 Byte | 1 Bye |
+
+* cmd ：该命令的ID
+* len：该命令的长度，会根据实际的 param 来进行填充
+* checksum ：该命令的校验和，会根据实际的 param 来进行填充
+* param：无
+* tail ：数据帧的尾
+
+
+
+
+
+
+
 ##### XProxys 对外的服务有客户端连接上
 
 该命令是由 `XProxys` 向 `XProxyc` 发送
