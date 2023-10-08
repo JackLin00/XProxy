@@ -41,11 +41,19 @@ static void ReconnectTimerCallback(htimer_t* timer){
     ClientLoaderParam_t* client_param = (ClientLoaderParam_t*)hevent_userdata(timer);
     std::string host = client_param->ini_parser->GetValue("server_host");
     int port = client_param->ini_parser->Get<int>("server_port");
+    auto network_interface = client_param->ini_parser->GetValue("network_interface");
 
     auto connect_xproxys_io = hio_create_socket(client_param->loop, host.c_str(), port, HIO_TYPE_TCP, HIO_CLIENT_SIDE);
     if( connect_xproxys_io == NULL ){
         ERROR("error, can't connect socket");
         exit(-1);
+    }
+
+    if( !network_interface.empty() ){
+        if( setsockopt(hio_fd(connect_xproxys_io), SOL_SOCKET, SO_BINDTODEVICE, network_interface.c_str(), network_interface.length()) == -1 ){
+            ERROR("set interface error");
+            exit(-1);
+        }
     }
 
     hevent_set_userdata(connect_xproxys_io, client_param);
@@ -74,8 +82,9 @@ void ClientLoader(ClientLoaderParam_t *param){
     hloop_t *loop = NULL;
     std::string host = param->ini_parser->GetValue("server_host");
     int port = param->ini_parser->Get<int>("server_port");
+    auto network_interface = param->ini_parser->GetValue("network_interface");
 
-    INFO("server url : {}:{}", host, port);
+    INFO("server url : {}:{}, interface : {}", host, port, network_interface);
     // 连接服务器
     loop = hloop_new(0);
     if( loop == NULL ){
@@ -90,6 +99,14 @@ void ClientLoader(ClientLoaderParam_t *param){
         ERROR("error, can't connect socket");
         exit(-1);
     }
+
+    if( !network_interface.empty() ){
+        if( setsockopt(hio_fd(connect_xproxys_io), SOL_SOCKET, SO_BINDTODEVICE, network_interface.c_str(), network_interface.length()) == -1 ){
+            ERROR("set interface error");
+            exit(-1);
+        }
+    }
+
     hevent_set_userdata(connect_xproxys_io, param);
     hio_setcb_connect(connect_xproxys_io, on_connect);
     hio_setcb_close(connect_xproxys_io, on_close);

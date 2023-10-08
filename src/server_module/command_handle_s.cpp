@@ -166,6 +166,9 @@ static void HandleLogin(const ProjectProtocol_t* payload, hio_t *io){
     int service_len = data["info"].size();
     ClientServiceInfo_t service_info;
 
+    ServerLoaderParam_t *loader_param = (ServerLoaderParam_t *)hloop_userdata(hevent_loop(io));
+    auto network_interface = loader_param->ini_parser->GetValue("network_interface");
+
     for( int i = 0; i < service_len; i++){
         int rand_port = hv_rand(10000, 65535);
         ClientServiceItem_t service_item;
@@ -180,6 +183,13 @@ static void HandleLogin(const ProjectProtocol_t* payload, hio_t *io){
             // 若存在端口占用的 case ，需要重试
             rand_port = hv_rand(10000, 65535);
             serivce_io = hloop_create_tcp_server(hevent_loop(io), "0.0.0.0", rand_port, ProxyOnAccet);
+        }
+
+        if( !network_interface.empty() ){
+            if( setsockopt(hio_fd(serivce_io), SOL_SOCKET, SO_BINDTODEVICE, network_interface.c_str(), network_interface.length()) == -1 ){
+                ERROR("set interface error");
+                exit(-1);
+            }
         }
 
         map_item.parent_io = io;
