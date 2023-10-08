@@ -44,23 +44,9 @@ static void on_accept(hio_t* io) {
 
 
 void ServerLoader(ServerLoaderParam_t *param) {
-    std::string host = param->ini_parser->GetValue("host", "common");
-    int port = param->ini_parser->Get<int>("port", "common");
-    SET_LOG_LEVEL(spdlog::level::info);
-    DEBUG("host : {}:{}", host.c_str(), port);
-
-    INFO("lua file name {}", param->ini_parser->GetValue("lua_file_path", "common"));
-
-    hloop_t* loop = hloop_new(0);
-    hio_t* listenio = hloop_create_tcp_server(loop, "0.0.0.0", port, on_accept);
-    if (listenio == NULL) {
-        hloop_free(&loop);
-        exit(-1);
-    }
-
 
 #ifdef ENABLE_LUA
-    param->lua_state = InitLuaState();
+    param->lua_state = InitLuaState((void*)param->ini_parser);
     auto lua_file_path = param->ini_parser->GetValue("lua_file_path", "common");
     if( !lua_file_path.empty() ){
         if( luaL_dofile(param->lua_state, lua_file_path.c_str()) != 0 ){
@@ -69,6 +55,19 @@ void ServerLoader(ServerLoaderParam_t *param) {
         }
     }
 #endif
+
+    std::string host = param->ini_parser->GetValue("host", "common");
+    int port = param->ini_parser->Get<int>("port", "common");
+    SET_LOG_LEVEL(spdlog::level::info);
+    INFO("host : {}:{}", host.c_str(), port);
+    INFO("lua file name {}", param->ini_parser->GetValue("lua_file_path", "common"));
+
+    hloop_t* loop = hloop_new(0);
+    hio_t* listenio = hloop_create_tcp_server(loop, "0.0.0.0", port, on_accept);
+    if (listenio == NULL) {
+        hloop_free(&loop);
+        exit(-1);
+    }
 
     memset((void*)&unpack_setting, 0, sizeof(unpack_setting_t));
     unpack_setting.package_max_length = DEFAULT_PACKAGE_MAX_LENGTH;

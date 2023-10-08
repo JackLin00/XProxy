@@ -1,7 +1,7 @@
 add_rules("mode.debug", "mode.release")
 set_warnings("all", "error")
 
-add_requires("libhv", {configs = {openssl = true}})
+add_requires("libhv")
 
 option("EnableXProxysLua")
     set_default(false)
@@ -69,6 +69,9 @@ target("XProxys")
 
         -- add user print
         add_files("src/lua_module/lua-print/*.c")
+
+        -- add ini module
+        add_files("src/lua_module/lua-conf/*.cpp")
     end
 
     if has_config("EnableXProxysRequests") then

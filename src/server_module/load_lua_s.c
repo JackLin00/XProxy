@@ -2,12 +2,14 @@
 
 extern int UserPrint(lua_State* L);
 extern int luaopen_cjson(lua_State* L);
+extern void SetupIniHandle(void *handle);
+extern int luaopen_conf(lua_State *L);
 
 #ifdef ENABLE_LUA_REQUESTS
 int luaopen_requests(lua_State *L);
 #endif
 
-lua_State* InitLuaState(){
+lua_State* InitLuaState(void *conf_handle){
     lua_State* ret = luaL_newstate();
     // loading base lib
     luaL_openlibs(ret);
@@ -17,6 +19,10 @@ lua_State* InitLuaState(){
     luaL_requiref(ret, "requests", luaopen_requests, 1);
     lua_pop(ret, 1);
 #endif
+
+    SetupIniHandle(conf_handle);
+    luaL_requiref(ret, "conf", luaopen_conf, 1);
+    lua_pop(ret, 1);
 
     lua_setglobal(ret, "cjson");
     lua_pushcfunction(ret, UserPrint);

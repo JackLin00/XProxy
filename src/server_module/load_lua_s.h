@@ -10,7 +10,7 @@ extern "C"{
 #include "lauxlib.h"
 #include "lualib.h"
 
-lua_State* InitLuaState();
+lua_State* InitLuaState(void *conf_handle);
 int CallXProxycConnectHandle(lua_State* L, const char* json_string);
 
 #ifdef __cplusplus
