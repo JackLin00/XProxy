@@ -1,4 +1,4 @@
-add_rules("mode.debug", "mode.release")
+add_rules("mode.debug", "mode.release", "mode.releasedbg")
 set_warnings("all", "error")
 
 add_requires("libhv")

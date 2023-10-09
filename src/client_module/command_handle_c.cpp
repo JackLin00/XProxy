@@ -46,15 +46,15 @@ void SendLoginCommand(IniParser *parser, hio_t *io){
         auto type = parser->GetValue("type", item);
         auto url = parser->GetValue("local_ip", item);
         auto port = parser->Get<int>("local_port", item);
+        auto remote_port = parser->Get<int>("remote_port", item);
 
         ServiceItem service_item;
-
-        // INFO("index : {}, service name : {}, local_ip : {}, local_port {}, type : {}", ServiceTable.size(), item.c_str(), url.c_str(), port, type.c_str());
 
         tmp_obj["index"] = ServiceTable.size();
         tmp_obj["name"] = item;
         tmp_obj["local_ip"] = url;
         tmp_obj["port"] = port;
+        tmp_obj["remote_port"] = remote_port;
 
         if( type == "TCP" || type == "tcp" ){
             service_item.type = 0;

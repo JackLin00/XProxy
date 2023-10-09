@@ -18,6 +18,10 @@
 #include <netinet/in.h>
 
 
+
+#define    DEFAULT_SERVER_PROXY_MIN_PORT                1023
+#define    DEFAULT_SERVER_PROXY_MAX_PORT                65536
+
 static std::unordered_map<uint32_t, ClientServiceInfo_t> clients_table;
 static std::unordered_map<int, ClientServerMap_t> clients_server_map;
 static std::unordered_map<uint32_t, hio_t*> subservice_clients;
@@ -161,7 +165,6 @@ static void HandleLogin(const ProjectProtocol_t* payload, hio_t *io){
     }
 #endif
 
-
     // 创建服务
     int service_len = data["info"].size();
     ClientServiceInfo_t service_info;
@@ -169,19 +172,29 @@ static void HandleLogin(const ProjectProtocol_t* payload, hio_t *io){
     ServerLoaderParam_t *loader_param = (ServerLoaderParam_t *)hloop_userdata(hevent_loop(io));
     auto network_interface = loader_param->ini_parser->GetValue("network_interface");
 
+    int max_proxy_port = loader_param->ini_parser->Get<int>("allow_port_max_range");
+    int min_proxy_port = loader_param->ini_parser->Get<int>("allow_port_min_range");
+
+    max_proxy_port = max_proxy_port == 0 ? DEFAULT_SERVER_PROXY_MIN_PORT : max_proxy_port;
+    min_proxy_port = min_proxy_port == 0 ? DEFAULT_SERVER_PROXY_MIN_PORT : min_proxy_port;
+
     for( int i = 0; i < service_len; i++){
-        int rand_port = hv_rand(10000, 65535);
         ClientServiceItem_t service_item;
         ClientServerMap_t map_item;
         service_item.index = (uint32_t)data["info"][i]["index"];
         service_item.service_name = data["info"][i]["name"];
         service_item.service_port = data["info"][i]["port"];
+        int proxy_port = data["info"][i]["remote_port"];
+
+        int rand_port;
+        if( proxy_port != 0 && (proxy_port >= min_proxy_port) && (proxy_port <= max_proxy_port))     rand_port = proxy_port;
+        else                                                                                         rand_port = hv_rand(min_proxy_port, max_proxy_port);
 
         // 每一个服务都需要创建一个 TCP 服务器
         hio_t *serivce_io = hloop_create_tcp_server(hevent_loop(io), "0.0.0.0", rand_port, ProxyOnAccet);
         while( serivce_io == NULL ){
             // 若存在端口占用的 case ，需要重试
-            rand_port = hv_rand(10000, 65535);
+            rand_port = hv_rand(min_proxy_port, max_proxy_port);
             serivce_io = hloop_create_tcp_server(hevent_loop(io), "0.0.0.0", rand_port, ProxyOnAccet);
         }
 

@@ -44,7 +44,6 @@ static void on_accept(hio_t* io) {
 
 
 void ServerLoader(ServerLoaderParam_t *param) {
-    
 #ifdef ENABLE_LUA
     param->lua_state = InitLuaState((void*)param->ini_parser);
     auto lua_file_path = param->ini_parser->GetValue("lua_file_path");
@@ -56,6 +55,14 @@ void ServerLoader(ServerLoaderParam_t *param) {
         }
     }
 #endif
+
+    int max_proxy_port = param->ini_parser->Get<int>("allow_port_max_range");
+    int min_proxy_port = param->ini_parser->Get<int>("allow_port_min_range");
+
+    if( min_proxy_port >= max_proxy_port ){
+        ERROR("allow_port_min_range bigger than allow_port_max_range. please check your config file.");
+        exit(-1);
+    }
 
     std::string host = param->ini_parser->GetValue("host");
     auto network_interface = param->ini_parser->GetValue("network_interface");
