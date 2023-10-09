@@ -145,12 +145,14 @@ public:
     }
     const char *what() const SPDLOG_NOEXCEPT override
     {
+        static std::string record_string;
         if (last_errno_)
         {
             fmt::memory_buffer buf;
             std::string msg(runtime_error::what());
             fmt::format_system_error(buf, last_errno_, msg);
-            return fmt::to_string(buf).c_str();
+            record_string = (const char*)fmt::to_string(buf).c_str(); 
+            return record_string.c_str();
         }
         else
         {
