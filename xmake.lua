@@ -89,3 +89,8 @@ target("XProxyc")
         add_packages("lua")
         add_defines("ENABLE_LUA")
     end
+
+
+target("backend-ui")
+    set_kind("binary")
+    add_files("ui/backend-ui/src/main.cpp")
