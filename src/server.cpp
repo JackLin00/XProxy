@@ -11,14 +11,26 @@ static const char options[] = "hvc:";
 static const option_t long_options[] = {
     {'h', "help",       NO_ARGUMENT},
     {'v', "version",    NO_ARGUMENT},
-    {'c', "confile",    REQUIRED_ARGUMENT}
+    {'c', "confile",    REQUIRED_ARGUMENT},
+#ifdef ENABLE_LUA
+    {'l', "lua",        REQUIRED_ARGUMENT}
+#endif
 };
 
+#ifdef ENABLE_LUA
+static const char detail_options[] = R"(
+  -h|--help                 Print this information
+  -v|--version              Print version
+  -c|--confile <confile>    Set configure file
+  -l|--lua <luafile>        run lua script file
+)";
+#else
 static const char detail_options[] = R"(
   -h|--help                 Print this information
   -v|--version              Print version
   -c|--confile <confile>    Set configure file
 )";
+#endif
 
 void PrintHelp() {
     printf("Usage: %s [%s]\n", "XProxys", options);
@@ -50,15 +62,19 @@ int main(int argc, char** argv) {
         exit(0);
     }
 
-    if( get_arg("c") == NULL ){
-        printf("please input config file path\n");
+    if( get_arg("c") == NULL && get_arg("l") == NULL ){
+        printf("please input config file path or do lua script\n");
         PrintHelp();
         exit(0);
     }
 
-    if (conf_file_handle.LoadFromFile(get_arg("c")) != 0) {
-        printf("Parse config file[%s] error,please check it.\n", get_arg("c"));
-        exit(0);
+    load_param.doluafile_path = get_arg("l");
+
+    if( load_param.doluafile_path == NULL ) {
+        if (conf_file_handle.LoadFromFile(get_arg("c")) != 0) {
+            printf("Parse config file[%s] error,please check it.\n", get_arg("c"));
+            exit(0);
+        }
     }
 
     load_param.ini_parser = &conf_file_handle;

@@ -191,10 +191,6 @@ static int requests_get(lua_State *L){
         }
     }
 
-    for(auto &headers_item : headers ){
-        printf(" %s = %s \n", headers_item.first.c_str(), headers_item.second.c_str());
-    }
-
     auto &struct_url = url_parse.url;
     requests::Response rsp;
     rsp = requests::get(struct_url.c_str(), headers);

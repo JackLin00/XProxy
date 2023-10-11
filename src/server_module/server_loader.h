@@ -11,6 +11,7 @@ typedef struct ServerLoaderParam{
     IniParser *ini_parser;
     #ifdef ENABLE_LUA
     lua_State* lua_state{NULL}; 
+    const char* doluafile_path{NULL};
     #endif
 
     ~ServerLoaderParam(){

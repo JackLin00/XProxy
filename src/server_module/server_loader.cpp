@@ -46,6 +46,16 @@ static void on_accept(hio_t* io) {
 void ServerLoader(ServerLoaderParam_t *param) {
 #ifdef ENABLE_LUA
     param->lua_state = InitLuaState((void*)param->ini_parser);
+    if( param->doluafile_path != NULL ){
+        // just run lua script
+        if( luaL_dofile(param->lua_state, param->doluafile_path) != 0 ){
+            ERROR("do lua file error : {}\nlua script path : {}", lua_tostring(param->lua_state, -1), param->doluafile_path);
+            lua_pop(param->lua_state, 1);
+        }
+        return;
+    }
+
+
     auto lua_file_path = param->ini_parser->GetValue("lua_file_path");
     INFO("lua file name {}", lua_file_path);
     if( !lua_file_path.empty() ){

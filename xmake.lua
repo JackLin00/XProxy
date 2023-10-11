@@ -4,21 +4,14 @@ set_warnings("all", "error")
 add_requires("libhv")
 
 option("EnableXProxysLua")
-    set_default(false)
+    set_default(true)
     set_showmenu(true)
     set_category("option")
     set_description("Enable or disable Lua In XProxys.")
 option_end()
 
-option("EnableXProxycLua")
-    set_default(false)
-    set_showmenu(true)
-    set_category("option")
-    set_description("Enable or disable Lua In XProxyc.")
-option_end()
-
 option("EnableXProxysRequests")
-    set_default(false)
+    set_default(true)
     set_showmenu(true)
     set_category("option")
     add_deps("EnableXProxysLua")
@@ -29,6 +22,15 @@ option("EnableXProxysRequests")
         end
     end)
 option_end()
+
+
+option("EnableXProxycLua")
+    set_default(false)
+    set_showmenu(true)
+    set_category("option")
+    set_description("Enable or disable Lua In XProxyc.")
+option_end()
+
 
 -- common area   begin
 
@@ -78,6 +80,9 @@ target("XProxys")
         add_files("src/lua_module/lua-requests/*.cpp")
         add_defines("ENABLE_LUA_REQUESTS")
     end
+    after_build(function (target)
+        os.cp(target:targetfile(), "./")
+    end)
 
 
 target("XProxyc")
