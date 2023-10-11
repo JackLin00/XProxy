@@ -2,7 +2,7 @@
 .xmake/
 build/
 .vscode
-
+node_modules
 # MacOS Cache
 .DS_Store
 compile_commands.json
