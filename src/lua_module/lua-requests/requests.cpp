@@ -76,7 +76,10 @@ static http_headers ParseRequestHeadersData(lua_State *L){
     lua_pushstring(L, "headers");
     lua_gettable(L, -2);
 
-    if( lua_type(L, -1) == LUA_TNIL )      return ret;      // not exist
+    if( lua_type(L, -1) == LUA_TNIL ){
+        lua_pop(L, 1);
+        return ret;      // not exist
+    }
     if( lua_type(L, -1) != LUA_TTABLE ){
         lua_pop(L, 1);
         luaL_error(L, "headers must be table.");
@@ -104,7 +107,10 @@ static std::string ParseRequestJsonData(lua_State *L){
     lua_pushstring(L, "json");
     lua_gettable(L, -2);
 
-    if( lua_type(L, -1) == LUA_TNIL )      return ret;      // not exist
+    if( lua_type(L, -1) == LUA_TNIL ) {
+        lua_pop(L, 1);
+        return ret;      // not exist
+    }
     if( lua_type(L, -1) != LUA_TTABLE ){
         lua_pop(L, 1);
         luaL_error(L, "json must be table.");
@@ -115,7 +121,6 @@ static std::string ParseRequestJsonData(lua_State *L){
     lua_getglobal(L, "cjson");
     lua_getfield(L, -1, "encode");
     lua_pushvalue(L, -3);
-
     lua_pcall(L, 1, 1, 0);
     ret = (const char*)lua_tostring(L, -1);
 
@@ -130,7 +135,10 @@ static std::string ParseRequtestParamData(lua_State *L, HUrl &url){
     lua_pushstring(L, "params");
     lua_gettable(L, -2);
 
-    if( lua_type(L, -1) == LUA_TNIL )                   return "";      // not exist
+    if( lua_type(L, -1) == LUA_TNIL ) {
+        lua_pop(L, 1);
+        return ret;      // not exist
+    }
     if( lua_type(L, -1) != LUA_TTABLE ){
         lua_pop(L, 1);
         luaL_error(L, "params must be table.");
