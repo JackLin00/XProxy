@@ -1,5 +1,9 @@
 #include "load_lua_s.h"
 
+#define      ON_XPROXY_CONN_FUNC_NAME                            "OnXProxycLogin"
+#define      ON_XPROXY_CONN_SUCC_NAME                            "OnXProxycLoginSucc"
+#define      ON_XPROXY_LOGIN_OUT_NAME                            "OnXProxyLoginOut"
+
 extern int UserPrint(lua_State* L);
 extern int luaopen_cjson(lua_State* L);
 extern void SetupIniHandle(void *handle);
@@ -31,7 +35,7 @@ lua_State* InitLuaState(void *conf_handle){
 }
 
 int CallXProxycConnectHandle(lua_State* L, const char* json_string){
-    lua_getglobal(L, "OnXProxycLogin");
+    lua_getglobal(L, ON_XPROXY_CONN_FUNC_NAME);
     if( !lua_isfunction(L, -1) ){
         lua_pop(L, 1);
         return 0;
@@ -48,11 +52,57 @@ int CallXProxycConnectHandle(lua_State* L, const char* json_string){
         return 0;
     }
     if( lua_pcall(L, 1, 1, 0) != LUA_OK ){
-        printf("error calling func OnXProxycLogin\n");
+        printf("error calling func %s, reason : %s\n", ON_XPROXY_CONN_FUNC_NAME, lua_tostring(L, -1));
         return 0;
     }
 
     int func_ret = lua_tointeger(L, -1);
     lua_pop(L, -1);
     return func_ret;
+}
+
+void CallAfterXProxycConnectHandle(lua_State* L, const char* json_string){
+    lua_getglobal(L, ON_XPROXY_CONN_SUCC_NAME);
+    if( !lua_isfunction(L, -1) ){
+        lua_pop(L, 1);
+        return;
+    }
+
+    lua_getglobal(L, "cjson");
+    lua_getfield(L, -1, "decode");
+    lua_remove(L, -2);
+
+    lua_pushstring(L, json_string);
+    if( lua_pcall(L, 1, 1, 0) != LUA_OK ){
+        printf("error calling func cjson.decode, reson : %s\n", lua_tostring(L, -1));
+        lua_pop(L, -1);
+        return;
+    }
+    if( lua_pcall(L, 1, 0, 0) != LUA_OK ){
+        printf("error calling func %s, reason : %s\n", ON_XPROXY_CONN_SUCC_NAME, lua_tostring(L, -1));
+        return;
+    }
+}
+
+void CallXProxycLoginOutHandle(lua_State* L, const char* json_string){
+    lua_getglobal(L, ON_XPROXY_LOGIN_OUT_NAME);
+    if( !lua_isfunction(L, -1) ){
+        lua_pop(L, 1);
+        return;
+    }
+
+    lua_getglobal(L, "cjson");
+    lua_getfield(L, -1, "decode");
+    lua_remove(L, -2);
+
+    lua_pushstring(L, json_string);
+    if( lua_pcall(L, 1, 1, 0) != LUA_OK ){
+        printf("error calling func cjson.decode, reson : %s\n", lua_tostring(L, -1));
+        lua_pop(L, -1);
+        return;
+    }
+    if( lua_pcall(L, 1, 0, 0) != LUA_OK ){
+        printf("error calling func %s, reason : %s\n", ON_XPROXY_LOGIN_OUT_NAME, lua_tostring(L, -1));
+        return;
+    }
 }

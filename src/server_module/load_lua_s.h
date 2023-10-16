@@ -12,6 +12,8 @@ extern "C"{
 
 lua_State* InitLuaState(void *conf_handle);
 int CallXProxycConnectHandle(lua_State* L, const char* json_string);
+void CallAfterXProxycConnectHandle(lua_State* L, const char* json_string);
+void CallXProxycLoginOutHandle(lua_State* L, const char* json_string);
 
 #ifdef __cplusplus
 }

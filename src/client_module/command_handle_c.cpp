@@ -40,6 +40,11 @@ void SendLoginCommand(IniParser *parser, hio_t *io){
     }
 
     json_obj["info"] = {};
+    if( parser->GetValue("ID", "").empty() ){
+        json_obj["ID"] = "unknown";
+    } else {
+        json_obj["ID"] = parser->GetValue("ID", "");
+    }
 
     for( auto item : service_list ){
         nlohmann::json tmp_obj;
@@ -72,6 +77,7 @@ void SendLoginCommand(IniParser *parser, hio_t *io){
     }
 
     std::string login_info = json_obj.dump(); 
+    INFO("send data : {}", login_info);
     CodecBuf_t send_buf = PackageLoginReqCommand(login_info);
     hio_write(io, send_buf.buf, send_buf.len);
 }

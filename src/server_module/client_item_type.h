@@ -11,7 +11,8 @@
 typedef struct ClientServiceItem{
     uint32_t index;                      // 索引号
     std::string service_name;            // 服务名称
-    int service_port;                    // 服务端口
+    std::string local_ip;                // 本地ip
+    int local_port;                      // 本地port
     int server_port;                     // 服务器负责转发的 TCP服务器端口
     hio_t *io;                           // 对应的 网络 IO
 }ClientServiceItem_t;
@@ -19,6 +20,7 @@ typedef struct ClientServiceItem{
 
 
 typedef struct ClientServiceInfo{
+    std::string ID;                      // xproxyc id
     std::forward_list<ClientServiceItem_t> service_list;
 }ClientServiceInfo_t;
 

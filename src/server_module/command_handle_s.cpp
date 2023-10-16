@@ -120,6 +120,12 @@ void CommandHandle(char *buf, int len, hio_t *io){
 void XproxyOnClose(hio_t *io){
     uint32_t id = hio_id(io);
     auto &services = clients_table[id];
+#ifdef ENABLE_LUA
+    nlohmann::json data;
+    data["ID"] = services.ID;
+    ServerLoaderParam_t *loader_param = (ServerLoaderParam_t *)hloop_userdata(hevent_loop(io));
+    CallXProxycLoginOutHandle(loader_param->lua_state, data.dump().c_str());
+#endif
     for( auto index : services.service_list ){
         // 关闭已经连接该服务的所有子连接
         for( auto &client_item : clients_server_map[index.server_port].client_list ){
@@ -168,6 +174,7 @@ static void HandleLogin(const ProjectProtocol_t* payload, hio_t *io){
     // 创建服务
     int service_len = data["info"].size();
     ClientServiceInfo_t service_info;
+    service_info.ID = data["ID"];
 
     ServerLoaderParam_t *loader_param = (ServerLoaderParam_t *)hloop_userdata(hevent_loop(io));
     auto network_interface = loader_param->ini_parser->GetValue("network_interface");
@@ -183,7 +190,8 @@ static void HandleLogin(const ProjectProtocol_t* payload, hio_t *io){
         ClientServerMap_t map_item;
         service_item.index = (uint32_t)data["info"][i]["index"];
         service_item.service_name = data["info"][i]["name"];
-        service_item.service_port = data["info"][i]["port"];
+        service_item.local_ip = data["info"][i]["local_ip"];
+        service_item.local_port = data["info"][i]["port"];
         int proxy_port = data["info"][i]["remote_port"];
 
         int rand_port;
@@ -216,13 +224,30 @@ static void HandleLogin(const ProjectProtocol_t* payload, hio_t *io){
     }
 
     clients_table[hio_id(io)] = std::move(service_info);
+#ifdef ENABLE_LUA
+    nlohmann::json device_info_table;
+    device_info_table["ID"] = data["ID"];
+    device_info_table["info"] = {};
+#endif
 
+    INFO("Get Device Connect (ID) : {}", data["ID"].dump());
     for( auto &item : clients_table ){
-        DEBUG("id : {}:", item.first);
         for( auto list_item : item.second.service_list ){
-            INFO("index : {}, service name : {}, service port : {}, server port : {}", list_item.index, list_item.service_name.c_str(), list_item.service_port, list_item.server_port);
+#ifdef ENABLE_LUA
+            nlohmann::json tmp;
+            tmp["name"] = list_item.service_name;
+            tmp["local_ip"] = list_item.local_ip;
+            tmp["local_port"] = list_item.local_port;
+            tmp["remote_port"] = list_item.server_port;
+            device_info_table["info"].push_back(tmp);
+#endif
+            INFO("index : {}, service name : {}, service port : {}, server port : {}", list_item.index, list_item.service_name.c_str(), list_item.local_port, list_item.server_port);
         }
     }
+#ifdef ENABLE_LUA
+    std::string device_info_string = device_info_table.dump();
+    CallAfterXProxycConnectHandle(param->lua_state, device_info_string.c_str());
+#endif
 
     // 进行回复
     CodecBuf_t send_buf = PackageLoginRspCommand(LOGIN_SUCCESS_CODE);
