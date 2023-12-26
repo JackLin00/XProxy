@@ -88,7 +88,7 @@ host = 0.0.0.0
 port = 8888
 allow_port_max_range = 10100
 allow_port_min_range = 10000
-lua_file_path = /home/zhd/jack/xproxy/test.lua
+lua_file_path = /home/jack/jack/xproxy/test.lua
 ; network_interface = lo
 ```
 * host: Specifies the host IP address where the server listens for incoming connections.
